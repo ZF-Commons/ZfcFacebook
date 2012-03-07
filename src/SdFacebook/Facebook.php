@@ -76,7 +76,7 @@ class Facebook
             {
                 $this->auth = new Auth\Iframe($this->fbSecret, $this->request);
             }
-            else
+            else if ($this->auth instanceof Auth === false)
             {
                 throw new Exception\AuthException('Request object not passed');
             }
@@ -108,7 +108,7 @@ class Facebook
     {
         if(!is_a($this->api, 'Access'))
         {
-            $this->api = new Facebook\Access($this->getAuth(),
+            $this->api = new Access($this->getAuth(),
                     new Client());
         }
         return $this->api;

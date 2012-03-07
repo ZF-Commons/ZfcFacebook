@@ -1,8 +1,8 @@
 <?php
 return array(
     'sdfacebook' => array(
-        'appid' => '113017628724890',
-        'appsecret' => 'b07b3178d54ac9117bd8067ca0a82696',
+        'appid' => 'APP_ID_HERE',
+        'appsecret' => 'APP_SECRET_HERE',
         'iframeapp' => true,
     ),
     'di' => array(

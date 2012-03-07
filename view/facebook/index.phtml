@@ -1,5 +1,10 @@
 <h3>SdFacebook Module</h3>
-    <p>
-        Your Facebook ID is <b><?php echo $this->facebookid; ?></b>
-    </p>
-
+<p>Your Facebook ID is <b><?php echo $this->facebookid; ?></b></p>
+<table>
+<?php foreach($this->details as $key=>$val): ?>
+    <tr>
+        <td><?php echo $key; ?></td>
+        <td><?php echo $val; ?></td>
+    </tr>
+<?php endforeach; ?>
+</table>

@@ -17,8 +17,10 @@ class FacebookController extends ActionController
             Module::getOption('appid'),
             $request
         );
+
         return array(
-            'facebookid' => $facebook->getFacebookId()
+            'facebookid' => $facebook->getFacebookId(),
+            'details' => $facebook->api()->getUserInfo(),
         );
     }
 }
