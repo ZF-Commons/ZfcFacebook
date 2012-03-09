@@ -2,7 +2,7 @@ Incredibly ropey prototype of a Facebook integration class.
 
  To use:
 
- 1. Copy the SdFacebook to your module directory
+ 1. Copy the ZfcFacebook to your module directory
  2. Register the module in your application's application.config.php
  3. Edit the module.config.php to have your Facebook app's App Id and Secret
  4. Tell your iframe app to point to www.yourdomain.com/facebook?a=b

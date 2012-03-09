@@ -1,5 +1,7 @@
-<h3>SdFacebook Module</h3>
-<p>Your Facebook ID is <b><?php echo $this->facebookid; ?></b></p>
+<h3>ZfcFacebook Module</h3>
+<hr />
+
+<h4>Your Facebook ID is <b><?php echo $this->facebookid; ?></b></h4>
 <table>
 <?php foreach($this->details as $key=>$val): ?>
     <tr>
@@ -8,3 +10,17 @@
     </tr>
 <?php endforeach; ?>
 </table>
+<hr />
+
+<h4>Your First 50 Friends</h4>
+<?php foreach($this->friends as $key=>$data): ?>
+    <?php if($key <= 50): ?>
+    <a href="http://www.facebook.com/<?php echo $data->id; ?>" target="_NEW">
+        <?php echo $data->name; ?>
+    </a><?php if($key == 50) echo '...'; else echo ','; ?>
+    <?php endif; ?>
+<?php endforeach; ?>
+<hr />
+
+<h4>FQL Results</h4>
+<p>The page <em class="zf-green"><?php echo $this->fqlresult->name; ?></em> has <em class="zf-green"><?php echo $this->fqlresult->fan_count; ?></em> likes</p>
