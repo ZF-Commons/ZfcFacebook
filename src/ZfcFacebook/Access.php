@@ -39,8 +39,9 @@ abstract class Access
      * @param array $params An option array of parameters to pass
      * @return stdClass
      */
-    protected function getFromGraph($uri, array $params=null)
+    public function getFromGraph($uri, array $params=null)
     {
+        $uri = self::FACEBOOK_GRAPH_URI.$uri;
         if(!is_array($params))
         {
             $params = array(
@@ -75,6 +76,10 @@ abstract class Access
         {
             throw new AccessException("{$data->error->type}: 
             {$data->error->message}");
+        }
+        if(isset($data->data))
+        {
+            return $data->data;
         }
         return $data;
     }

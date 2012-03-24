@@ -21,6 +21,7 @@ use Zend\Http\Client,
  */
 class Facebook
 {
+
     /**
      * @var Request;
      **/
@@ -38,7 +39,7 @@ class Facebook
      **/
     protected $auth;
     /**
-     * @var Access;
+     * @var ZfcFacebook\Access;
      **/
     protected $api;
 
@@ -93,16 +94,16 @@ class Facebook
 //                    $this->fbCode);
 //            $this->auth->getToken();
 //        }
-//        if($this->auth instanceof Facebook\Auth === false)
-//        {
-//            throw new Exception\AuthException('No valid Auth adapter found');
-//        }
+        if($this->auth instanceof Auth === false)
+        {
+            throw new Exception\AuthException('No valid Auth adapter found');
+        }
         return $this->auth;
     }
 
     /**
      * Returns the Facebook Access Object
-     * @return Spabby\Facebook\Access
+     * @return \ZfcFacebook\Access
      */
     public function api()
     {
@@ -114,10 +115,26 @@ class Facebook
         return $this->api;
     }
 
+    /**
+     * Wrapper function to get the logged in user's Facebook Id
+     * @return string
+     */
     public function getFacebookId()
     {
         $auth = $this->getAuth();
         return $auth->getFacebookId();
+    }
+
+    public function getAuthUrl($redirectUrl = '/')
+    {
+        $authUrl = Auth::BASE_AUTH_URL
+            .'?client_id='
+            .Module::getOption('appid')
+            .'&redirect_uri='
+            .$redirectUrl
+            .'&scope='
+            .implode(',', Module::getOption('extendedperms')->toArray());
+        return $authUrl;
     }
 
 }

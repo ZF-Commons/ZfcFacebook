@@ -5,7 +5,9 @@ namespace ZfcFacebook;
 use Zend\Module\Manager,
     Zend\EventManager\Event,
     Zend\EventManager\StaticEventManager,
-    Zend\Module\Consumer\AutoloaderProvider;
+    Zend\Module\Consumer\AutoloaderProvider,
+    Zend\Di\Di,
+    ZfcFacebook\Facebook;
 
 class Module implements AutoloaderProvider
 {
@@ -27,16 +29,13 @@ class Module implements AutoloaderProvider
 
     public function onDispatch(Event $e)
     {
-        // this is an iframe app, we need to error if it doesn't have signed_request
-//        if(self::getOption('iframeapp'))
-//        {
-//            $request = $e->getParam('request');
-//            $signedRequest = $request->post()->get('signed_request');
-//            if(empty($signedRequest))
-//            {
-//                throw new Exception\AuthException('No signed_request has been posted, are you trying to access outside Facebook?');
-//            }
-//        }
+        $request = $e->getParam('request');
+        $di = new Di();
+        $di->get('ZfcFacebook\Facebook', array(
+            'fbSecret' => self::getOption('appsecret'),
+            'fbClientId' => self::getOption('appid'),
+            'request' => $request
+        ));
     }
 
     public function getAutoloaderConfig()
