@@ -70,11 +70,11 @@ class Iframe implements Auth
         if(!array_key_exists('expires', $decodedSigs)
                 || !array_key_exists('oauth_token', $decodedSigs)) 
         {
-            throw new AuthException("Token details do not exist");
+            throw new Exception\AuthException("Token details do not exist");
         }
         if($decodedSigs['expires'] < time())
         {
-            throw new AuthException("Token has expired");
+            throw new Exception\AuthException("Token has expired");
         }
         return $this->decodedSigs;
     }
@@ -119,14 +119,14 @@ class Iframe implements Auth
         $data = \json_decode($this->base64UrlDecode($payload), true);
         if (\strtoupper($data['algorithm']) !== 'HMAC-SHA256')
         {
-            throw new AuthException('Invalid Signed Request');
+            throw new Exception\AuthException('Invalid Signed Request');
         }
 
         // Check sig
         $expectedSig = \hash_hmac('sha256', $payload, $this->fbSecret, $raw = true);
         if ($decodedSig !== $expectedSig)
         {
-            throw new AuthException('Invalid Signed Request');
+            throw new Exception\AuthException('Invalid Signed Request');
         }
 
         return $data;
