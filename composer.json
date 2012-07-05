@@ -1,0 +1,11 @@
+{
+    "name": "spabby/zfc-facebook",
+    "type": "library",
+    "keywords": [
+        "zf2"
+    ],
+    "require": {
+        "php": ">=5.3.3",
+        "zendframework/zendframework": "dev-master",
+    },
+}
