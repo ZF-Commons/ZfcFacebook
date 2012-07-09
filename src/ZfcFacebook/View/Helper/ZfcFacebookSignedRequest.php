@@ -14,10 +14,10 @@ class ZfcFacebookSignedRequest extends AbstractHelper
 
     public function __invoke()
     {
-        return "foo";
+        return $this->facebook->getAuth()->getSignedRequest();
     }
 
-    protected function setFacebook(\ZfcFacebook\Facebook $facebook)
+    public function setFacebook(\ZfcFacebook\Facebook $facebook)
     {
         $this->facebook = $facebook;
         return $this;

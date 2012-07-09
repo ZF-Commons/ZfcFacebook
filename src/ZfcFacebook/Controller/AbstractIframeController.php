@@ -2,15 +2,15 @@
 
 namespace ZfcFacebook\Controller;
 
-use Zend\Mvc\Controller\ActionController,
-    Zend\View\Model\ViewModel,
-    Zend\Mvc\MvcEvent,
-    ZfcFacebook\Module as Module,
-    ZfcFacebook\Facebook,
-    ZfcFacebook\Exception,
-    ZfcFacebook;
+use Zend\Mvc\Controller\AbstractActionController as ActionController;
+use Zend\View\Model\ViewModel;
+use Zend\Mvc\MvcEvent;
+use ZfcFacebook\Module as Module;
+use ZfcFacebook\Facebook;
+use ZfcFacebook\Exception;
+use ZfcFacebook;
 
-abstract class IframeController extends ActionController
+abstract class AbstractIframeController extends ActionController
 {
 
     /**

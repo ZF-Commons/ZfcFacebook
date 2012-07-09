@@ -1,11 +1,11 @@
 <?php
 namespace ZfcFacebook;
 
-use Zend\Http\Client,
-    ZfcFacebook\Module,
-    ZfcFacebook\Exception,
-    ZfcFacebook\Auth,
-    Zend\Http\PhpEnvironment\Request;
+use Zend\Http\Client;
+use ZfcFacebook\Module;
+use ZfcFacebook\Exception;
+use ZfcFacebook\Auth;
+use Zend\Http\PhpEnvironment\Request;
 
 /**
  * Container class for Facebook integration, contains automatic authentication
@@ -27,19 +27,15 @@ class Facebook
      **/
     protected $request;
     /**
-     * @var string
-     **/
-    protected $fbSecret;
-    /**
-     * @var string
-     **/
-    protected $fbClientId;
+     * @var Array
+     */
+    public $options;
     /**
      * @var Spabby\Facebook\Auth
      **/
     protected $auth;
     /**
-     * @var ZfcFacebook\Access;
+     * @var Access;
      **/
     protected $api;
 
@@ -51,13 +47,11 @@ class Facebook
      * @param string $fbCode  Access code passed from Facebook (optional)
      */
     public function __construct(
-        $fbSecret,
-        $fbClientId,
+        $options,
         Request $request=null,
         $fbCode=null)
     {
-        $this->fbSecret = $fbSecret;
-        $this->fbClientId = $fbClientId;
+        $this->options = $options;
         $this->request = $request;
         $this->fbCode = $fbCode;
     }
@@ -65,17 +59,17 @@ class Facebook
     /**
      * Returns valid Facebook Auth object (if authentication is successful)
      * @return Facebook\Auth
-     * @throws Facebook\Exception\AuthException
+     * @throws Exception\AuthException
      */
     public function getAuth()
     {
-        if(Module::getOption('iframeapp'))
+        if($this->options['iframeapp'])
         {
             // If no auth set, we can use Iframe auth, and the sigs are set, do it!
-            if($this->auth instanceof Auth === false
+            if(!($this->auth instanceof Auth)
                     && $this->request instanceof Request)
             {
-                $this->auth = new Auth\Iframe($this->fbSecret, $this->request);
+                $this->auth = new Auth\Iframe($this->options['appsecret'], $this->request);
             }
             else if ($this->auth instanceof Auth === false)
             {

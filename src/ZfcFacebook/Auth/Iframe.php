@@ -38,12 +38,9 @@ class Iframe implements Auth
      */
     public function getSignedRequest()
     {
-        if(!$this->request->isPost())
-        {
-            throw new Exception\AuthException('No parameters have been posted, are you trying to access outside Facebook?');
-        }
-
-        $signedRequest = $this->request->post()->get('signed_request');
+        $signedRequest = ($this->request->getPost()->get('signed_request')
+            ? $this->request->getPost()->get('signed_request')
+            : $this->request->getQuery()->get('signed_request'));
         if(empty($signedRequest))
         {
             throw new Exception\AuthException('No signed_request has been posted, are you trying to access outside Facebook?');
@@ -53,7 +50,7 @@ class Iframe implements Auth
     
     /**
      * Returns the decoded facebook sigs
-     * @throws Spabby\Facebook\AuthException
+     * @throws \ZfcFacebook\Exception\AuthException
      * @return array
      */
     public function getDecodedSigs()
@@ -85,7 +82,7 @@ class Iframe implements Auth
     
     /**
      * Returns the Facebook oauth_token from the decoded sigs
-     * @throws Spabby\Facebook\AuthException
+     * @throws \ZfcFacebook\Exception\AuthException
      * @return string
      */
     public function getToken()
@@ -123,14 +120,14 @@ class Iframe implements Auth
         $data = \json_decode($this->base64UrlDecode($payload), true);
         if (\strtoupper($data['algorithm']) !== 'HMAC-SHA256')
         {
-            throw new AuthException('Invalid Signed Request');
+            throw new Exception\AuthException('Invalid Signed Request');
         }
 
         // Check sig
         $expectedSig = \hash_hmac('sha256', $payload, $this->fbSecret, $raw = true);
         if ($decodedSig !== $expectedSig)
         {
-            throw new AuthException('Invalid Signed Request');
+            throw new Exception\AuthException('Invalid Signed Request');
         }
 
         return $data;
