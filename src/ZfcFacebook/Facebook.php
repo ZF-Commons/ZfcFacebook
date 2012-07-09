@@ -48,8 +48,8 @@ class Facebook
      */
     public function __construct(
         $options,
-        Request $request=null,
-        $fbCode=null)
+        Request $request = null,
+        $fbCode = null)
     {
         $this->options = $options;
         $this->request = $request;
@@ -63,16 +63,13 @@ class Facebook
      */
     public function getAuth()
     {
-        if($this->options['iframeapp'])
-        {
+        if ($this->options['iframeapp']) {
             // If no auth set, we can use Iframe auth, and the sigs are set, do it!
-            if(!($this->auth instanceof Auth)
-                    && $this->request instanceof Request)
-            {
+            if (!($this->auth instanceof Auth)
+                && $this->request instanceof Request
+            ) {
                 $this->auth = new Auth\Iframe($this->options['appsecret'], $this->request);
-            }
-            else if ($this->auth instanceof Auth === false)
-            {
+            } else if ($this->auth instanceof Auth === false) {
                 throw new Exception\AuthException('Request object not passed');
             }
         }
@@ -88,8 +85,7 @@ class Facebook
 //                    $this->fbCode);
 //            $this->auth->getToken();
 //        }
-        if($this->auth instanceof Auth === false)
-        {
+        if ($this->auth instanceof Auth === false) {
             throw new Exception\AuthException('No valid Auth adapter found');
         }
         return $this->auth;
@@ -101,10 +97,9 @@ class Facebook
      */
     public function api()
     {
-        if(!is_a($this->api, 'Access'))
-        {
+        if (!is_a($this->api, 'Access')) {
             $this->api = new Common($this->getAuth(),
-                    new Client());
+                new Client());
         }
         return $this->api;
     }
@@ -122,12 +117,12 @@ class Facebook
     public function getAuthUrl($redirectUrl = '/')
     {
         $authUrl = Auth::BASE_AUTH_URL
-            .'?client_id='
-            .Module::getOption('appid')
-            .'&redirect_uri='
-            .$redirectUrl
-            .'&scope='
-            .implode(',', Module::getOption('extendedperms')->toArray());
+            . '?client_id='
+            . $this->options['appid']
+            . '&redirect_uri='
+            . $redirectUrl
+            . '&scope='
+            . implode(',', $this->options['extendedperms']);
         return $authUrl;
     }
 

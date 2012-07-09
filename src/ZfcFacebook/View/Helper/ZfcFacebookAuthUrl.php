@@ -4,7 +4,7 @@ namespace ZfcFacebook\View\Helper;
 
 use Zend\View\Helper\AbstractHelper;
 
-class ZfcFacebookSignedRequest extends AbstractHelper
+class ZfcFacebookAuthUrl extends AbstractHelper
 {
 
     /**
@@ -13,11 +13,12 @@ class ZfcFacebookSignedRequest extends AbstractHelper
     protected $facebook;
 
     /**
+     * @param $redirectUrl
      * @return string
      */
-    public function __invoke()
+    public function __invoke($redirectUrl)
     {
-        return $this->facebook->getAuth()->getSignedRequest();
+        return $this->facebook->getAuthUrl($redirectUrl);
     }
 
     /**

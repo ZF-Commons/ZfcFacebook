@@ -34,7 +34,20 @@ class Module implements
     {
         return array(
             'factories' => array(
-
+                'ZfcFacebookSignedRequest' => function ($sm)
+                {
+                    $locator = $sm->getServiceLocator();
+                    $viewHelper = new View\Helper\ZfcFacebookSignedRequest();
+                    $viewHelper->setFacebook($locator->get('facebook'));
+                    return $viewHelper;
+                },
+                'ZfcFacebookAuthUrl' => function ($sm)
+                {
+                    $locator = $sm->getServiceLocator();
+                    $viewHelper = new View\Helper\ZfcFacebookAuthUrl();
+                    $viewHelper->setFacebook($locator->get('facebook'));
+                    return $viewHelper;
+                },
             ),
         );
     }
@@ -48,12 +61,6 @@ class Module implements
                     $config = $sm->get('config');
                     $facebook = new Facebook($config['ZfcFacebook'], $sm->get('request'));
                     return $facebook;
-                },
-                'ZfcFacebookSignedRequest' => function ($sm)
-                {
-                    $viewHelper = new View\Helper\ZfcFacebookSignedRequest();
-                    $viewHelper->setFacebook($sm->get('facebook'));
-                    return $viewHelper;
                 },
             ),
         );

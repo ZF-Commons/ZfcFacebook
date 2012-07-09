@@ -2,7 +2,7 @@
 
 namespace ZfcFacebook\Controller;
 
-use Zend\Mvc\Controller\AbstractActionController as ActionController;
+use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
 use Zend\Mvc\MvcEvent;
 use ZfcFacebook\Module as Module;
@@ -10,31 +10,30 @@ use ZfcFacebook\Facebook;
 use ZfcFacebook\Exception;
 use ZfcFacebook;
 
-abstract class AbstractIframeController extends ActionController
+abstract class AbstractIframeController extends AbstractActionController
 {
 
     /**
-     * @var Facebook;
+     * @var \ZfcFacebook\Facebook
      */
     protected $facebook;
 
     protected function attachDefaultListeners()
     {
         parent::attachDefaultListeners();
-        $events = $this->events();
-        $events->attach('dispatch', array($this, 'preDispatch'), 100);
+        /**
+         * @todo Think of how we can automatically redirect to allow page if user hasn't installed
+         */
+        $this->events->attach('dispatch', array($this, 'preDispatch'), 100);
     }
 
     public function preDispatch (MvcEvent $e)
     {
-        $this->facebook = new Facebook(
-            Module::getOption('appsecret'),
-            Module::getOption('appid'),
-            $e->getRequest()
-        );
+
+        $facebook = $this->getFacebook();
         try
         {
-            $this->facebook->getFacebookId();
+            $facebook->getFacebookId();
         }
         catch (Exception\AuthException $err)
         {
@@ -43,8 +42,20 @@ abstract class AbstractIframeController extends ActionController
                 throw new Exception\AuthException($err->getMessage(), $err->getCode());
             }
 //            $e->getRouteMatch()->setParam('controller', Module::getOption('notinstalledcontroller'));
-            $e->getRouteMatch()->setParam('action', Module::getOption('notinstalledaction'));
+            $e->getRouteMatch()->setParam('action', $facebook->options['notinstalledaction']);
         }
     }
+
+    /**
+     * @return \ZfcFacebook\Facebook
+     */
+    public function getFacebook()
+    {
+        if(!($this->facebook instanceof Facebook)) {
+            $this->facebook = $this->getServiceLocator()->get('facebook');
+        }
+        return $this->facebook;
+    }
+
 
 }
