@@ -6,7 +6,7 @@ use ZfcFacebook\Exception,
     Zend\Http\PhpEnvironment\Request;
 
 class Iframe implements Auth
-{    
+{
     /**
      * Facebook secret for application
      * @var string
@@ -67,6 +67,7 @@ class Iframe implements Auth
         if(!array_key_exists('expires', $decodedSigs)
                 || !array_key_exists('oauth_token', $decodedSigs)) 
         {
+<<<<<<< HEAD
             if(!array_key_exists('user', $decodedSigs))
             {
                 throw new  Exception\AuthException("Token details do not exist");
@@ -76,6 +77,13 @@ class Iframe implements Auth
         if($decodedSigs['expires'] < time())
         {
             throw new  Exception\AuthException("Token has expired");
+=======
+            throw new Exception\AuthException("Token details do not exist");
+        }
+        if($decodedSigs['expires'] < time())
+        {
+            throw new Exception\AuthException("Token has expired");
+>>>>>>> 85694784d558aad013a2c967882834dd447135d4
         }
         return $this->decodedSigs;
     }
