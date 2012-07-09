@@ -2,42 +2,15 @@
 
 namespace ZfcFacebook;
 
-use Zend\Module\Manager,
-    Zend\EventManager\Event,
-    Zend\EventManager\StaticEventManager,
-    Zend\Module\Consumer\AutoloaderProvider,
-    Zend\Di\Di,
-    ZfcFacebook\Facebook;
+use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
+use Zend\ModuleManager\Feature\ConfigProviderInterface;
+use Zend\ModuleManager\Feature\ServiceProviderInterface;
 
-class Module implements AutoloaderProvider
+class Module implements
+    AutoloaderProviderInterface,
+    ConfigProviderInterface,
+    ServiceProviderInterface
 {
-    protected static $options;
-
-    public function init(Manager $moduleManager)
-    {
-        $events = StaticEventManager::getInstance();
-        $events->attach('bootstrap', 'bootstrap', array($this, 'onBootstrap'));
-    }
-
-    public function onBootstrap(Event $e)
-    {
-        $config = $e->getParam('config');
-        static::$options = $config['ZfcFacebook'];
-        $app = $e->getParam('application');
-        $app->events()->attach('dispatch', array($this, 'onDispatch'), -100);
-    }
-
-    public function onDispatch(Event $e)
-    {
-        $request = $e->getParam('request');
-        $di = new Di();
-        $di->get('ZfcFacebook\Facebook', array(
-            'fbSecret' => self::getOption('appsecret'),
-            'fbClientId' => self::getOption('appid'),
-            'request' => $request
-        ));
-    }
-
     public function getAutoloaderConfig()
     {
         return array(
@@ -57,14 +30,33 @@ class Module implements AutoloaderProvider
         return include __DIR__ . '/config/module.config.php';
     }
 
-    /**
-     * @TODO: Copy EDP's better way of handling module settings/options
-     */
-    public static function getOption($option)
+    public function getViewHelperConfiguration()
     {
-        if (!isset(static::$options[$option])) {
-            return null;
-        }
-        return static::$options[$option];
+        return array(
+            'factories' => array(
+
+            ),
+        );
     }
+
+    public function getServiceConfiguration()
+    {
+        return array(
+            'factories' => array(
+                'facebook' => function($sm)
+                {
+                    $config = $sm->get('config');
+                    $facebook = new Facebook($config['ZfcFacebook'], $sm->get('request'));
+                    return $facebook;
+                },
+                'ZfcFacebookSignedRequest' => function ($sm)
+                {
+                    $viewHelper = new View\Helper\ZfcFacebookSignedRequest();
+                    $viewHelper->setFacebook($sm->get('facebook'));
+                    return $viewHelper;
+                },
+            ),
+        );
+    }
+
 }
