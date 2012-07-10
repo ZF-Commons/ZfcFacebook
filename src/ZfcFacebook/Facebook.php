@@ -1,11 +1,11 @@
 <?php
 namespace ZfcFacebook;
 
-use Zend\Http\Client,
-    ZfcFacebook\Module,
-    ZfcFacebook\Exception,
-    ZfcFacebook\Auth,
-    Zend\Http\PhpEnvironment\Request;
+use Zend\Http\Client;
+use ZfcFacebook\Module;
+use ZfcFacebook\Exception;
+use ZfcFacebook\Auth;
+use Zend\Http\PhpEnvironment\Request;
 
 /**
  * Container class for Facebook integration, contains automatic authentication
@@ -21,18 +21,15 @@ use Zend\Http\Client,
  */
 class Facebook
 {
+
     /**
      * @var Request;
      **/
     protected $request;
     /**
-     * @var string
-     **/
-    protected $fbSecret;
-    /**
-     * @var string
-     **/
-    protected $fbClientId;
+     * @var Array
+     */
+    public $options;
     /**
      * @var Spabby\Facebook\Auth
      **/
@@ -50,13 +47,11 @@ class Facebook
      * @param string $fbCode  Access code passed from Facebook (optional)
      */
     public function __construct(
-        $fbSecret,
-        $fbClientId,
-        Request $request=null,
-        $fbCode=null)
+        $options,
+        Request $request = null,
+        $fbCode = null)
     {
-        $this->fbSecret = $fbSecret;
-        $this->fbClientId = $fbClientId;
+        $this->options = $options;
         $this->request = $request;
         $this->fbCode = $fbCode;
     }
@@ -64,20 +59,17 @@ class Facebook
     /**
      * Returns valid Facebook Auth object (if authentication is successful)
      * @return Facebook\Auth
-     * @throws Facebook\Exception\AuthException
+     * @throws Exception\AuthException
      */
     public function getAuth()
     {
-        if(Module::getOption('iframeapp'))
-        {
+        if ($this->options['iframeapp']) {
             // If no auth set, we can use Iframe auth, and the sigs are set, do it!
-            if($this->auth instanceof Auth === false
-                    && $this->request instanceof Request)
-            {
-                $this->auth = new Auth\Iframe($this->fbSecret, $this->request);
-            }
-            else if ($this->auth instanceof Auth === false)
-            {
+            if (!($this->auth instanceof Auth)
+                && $this->request instanceof Request
+            ) {
+                $this->auth = new Auth\Iframe($this->options['appsecret'], $this->request);
+            } else if ($this->auth instanceof Auth === false) {
                 throw new Exception\AuthException('Request object not passed');
             }
         }
@@ -93,31 +85,45 @@ class Facebook
 //                    $this->fbCode);
 //            $this->auth->getToken();
 //        }
-//        if($this->auth instanceof Facebook\Auth === false)
-//        {
-//            throw new Exception\AuthException('No valid Auth adapter found');
-//        }
+        if ($this->auth instanceof Auth === false) {
+            throw new Exception\AuthException('No valid Auth adapter found');
+        }
         return $this->auth;
     }
 
     /**
      * Returns the Facebook Access Object
-     * @return Spabby\Facebook\Access
+     * @return \ZfcFacebook\Access
      */
     public function api()
     {
-        if(!is_a($this->api, 'Access'))
-        {
+        if (!is_a($this->api, 'Access')) {
             $this->api = new Common($this->getAuth(),
-                    new Client());
+                new Client());
         }
         return $this->api;
     }
 
+    /**
+     * Wrapper function to get the logged in user's Facebook Id
+     * @return string
+     */
     public function getFacebookId()
     {
         $auth = $this->getAuth();
         return $auth->getFacebookId();
+    }
+
+    public function getAuthUrl($redirectUrl = '/')
+    {
+        $authUrl = Auth::BASE_AUTH_URL
+            . '?client_id='
+            . $this->options['appid']
+            . '&redirect_uri='
+            . $redirectUrl
+            . '&scope='
+            . implode(',', $this->options['extendedperms']);
+        return $authUrl;
     }
 
 }
