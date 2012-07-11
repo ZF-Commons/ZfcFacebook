@@ -62,6 +62,11 @@ class Module implements
                     $facebook = new Facebook($config['ZfcFacebook'], $sm->get('request'));
                     return $facebook;
                 },
+                'facebookId' => function($sm)
+                {
+                    $facebook = $sm->get('facebook');
+                    return $facebook->getFacebookId();
+                }
             ),
         );
     }
