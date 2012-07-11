@@ -6,12 +6,12 @@ use ZfcFacebook\Exception,
     Zend\Http\PhpEnvironment\Request;
 
 class Iframe implements Auth
-{    
+{
     /**
      * Facebook secret for application
      * @var string
      */
-    protected $fbSecret; 
+    protected $fbSecret;
     /**
      * @var Zend\Http\PhpEnvironment\Request;
      */
@@ -31,7 +31,7 @@ class Iframe implements Auth
         $this->fbSecret = $fbSecret;
         $this->request = $request;
     }
-    
+
     /**
      * Gets the signed request
      * @return string
@@ -47,7 +47,7 @@ class Iframe implements Auth
         }
         return $signedRequest;
     }
-    
+
     /**
      * Returns the decoded facebook sigs
      * @throws \ZfcFacebook\Exception\AuthException
@@ -65,8 +65,14 @@ class Iframe implements Auth
         }
         $decodedSigs = $this->decodedSigs;
         if(!array_key_exists('expires', $decodedSigs)
-                || !array_key_exists('oauth_token', $decodedSigs)) 
+                || !array_key_exists('oauth_token', $decodedSigs))
         {
+            throw new Exception\AuthException("Token details do not exist");
+        }
+        if($decodedSigs['expires'] < time())
+        {
+            throw new Exception\AuthException("Token has expired");
+
             if(!array_key_exists('user', $decodedSigs))
             {
                 throw new  Exception\AuthException("Token details do not exist");
@@ -79,7 +85,7 @@ class Iframe implements Auth
         }
         return $this->decodedSigs;
     }
-    
+
     /**
      * Returns the Facebook oauth_token from the decoded sigs
      * @throws \ZfcFacebook\Exception\AuthException
@@ -90,7 +96,7 @@ class Iframe implements Auth
         $decodedSigs = $this->getDecodedSigs();
         return (string) $decodedSigs['oauth_token'];
     }
-    
+
     /**
      * Returns auth'd user's Facebook ID
      * @return string
@@ -98,13 +104,13 @@ class Iframe implements Auth
     public function getFacebookId()
     {
         $decodedSigs = $this->getDecodedSigs();
-        return (string) $decodedSigs['user_id'];            
+        return (string) $decodedSigs['user_id'];
     }
-    
+
     /**
      * Decodes signed request
      * @throws Exception\AuthException
-     * @return array 
+     * @return array
      */
     protected function parseSignedRequest()
     {
