@@ -30,7 +30,7 @@ class Module implements
         return include __DIR__ . '/config/module.config.php';
     }
 
-    public function getViewHelperConfiguration()
+    public function getViewHelperConfig()
     {
         return array(
             'factories' => array(
@@ -52,7 +52,7 @@ class Module implements
         );
     }
 
-    public function getServiceConfiguration()
+    public function getServiceConfig()
     {
         return array(
             'factories' => array(
