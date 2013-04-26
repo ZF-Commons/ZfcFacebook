@@ -2,7 +2,6 @@
 namespace ZfcFacebook;
 
 use Zend\Http\Client;
-use ZfcFacebook\Module;
 use ZfcFacebook\Exception;
 use ZfcFacebook\Auth;
 use Zend\Http\PhpEnvironment\Request;
@@ -31,7 +30,7 @@ class Facebook
      */
     public $options;
     /**
-     * @var Spabby\Facebook\Auth
+     * @var Auth
      **/
     protected $auth;
     /**
@@ -40,11 +39,9 @@ class Facebook
     protected $api;
 
     /**
-     * Constructor
-     * @param string $fbSecret  Facebook API Secret token
-     * @param int $fbClientId  Facebook Client ID
-     * @param string $request  Request object (optional)
-     * @param string $fbCode  Access code passed from Facebook (optional)
+     * @param $options
+     * @param Request $request
+     * @param null $fbCode
      */
     public function __construct(
         $options,
@@ -58,7 +55,7 @@ class Facebook
 
     /**
      * Returns valid Facebook Auth object (if authentication is successful)
-     * @return Facebook\Auth
+     * @return Auth
      * @throws Exception\AuthException
      */
     public function getAuth()
@@ -68,7 +65,7 @@ class Facebook
             if (!($this->auth instanceof Auth)
                 && $this->request instanceof Request
             ) {
-                $this->auth = new Auth\Iframe($this->options['appsecret'], $this->request);
+                $this->auth = new Auth\Iframe($this->options['appsecret'], $this->request, $this->options);
             } else if ($this->auth instanceof Auth === false) {
                 throw new Exception\AuthException('Request object not passed');
             }
@@ -114,6 +111,10 @@ class Facebook
         return $auth->getFacebookId();
     }
 
+    /**
+     * @param string $redirectUrl
+     * @return string
+     */
     public function getAuthUrl($redirectUrl = '/')
     {
         $authUrl = Auth::BASE_AUTH_URL
@@ -124,6 +125,17 @@ class Facebook
             . '&scope='
             . implode(',', $this->options['extendedperms']);
         return $authUrl;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getDecodedSigs()
+    {
+        if(!$this->options['iframeapp']) {
+            return false;
+        }
+        return $this->getAuth()->getDecodedSigs();
     }
 
 }

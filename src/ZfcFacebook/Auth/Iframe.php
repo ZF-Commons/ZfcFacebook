@@ -1,9 +1,9 @@
 <?php
 namespace ZfcFacebook\Auth;
 
-use ZfcFacebook\Exception,
-    ZfcFacebook\Auth as Auth,
-    Zend\Http\PhpEnvironment\Request;
+use Zend\Http\PhpEnvironment\Request;
+use ZfcFacebook\Auth as Auth;
+use ZfcFacebook\Exception;
 
 class Iframe implements Auth
 {
@@ -13,7 +13,7 @@ class Iframe implements Auth
      */
     protected $fbSecret;
     /**
-     * @var Zend\Http\PhpEnvironment\Request;
+     * @var Request;
      */
     protected $request;
     /**
@@ -22,79 +22,29 @@ class Iframe implements Auth
      */
     protected $decodedSigs;
     /**
-     * Constructor
-     * @param type string
-     * @param type string
+     * @var array
      */
-    public function __construct($fbSecret, Request $request)
+    protected $configuration;
+
+    /**
+     * @param $fbSecret
+     * @param Request $request
+     * @param array $configuration
+     */
+    public function __construct($fbSecret, Request $request, array $configuration)
     {
         $this->fbSecret = $fbSecret;
         $this->request = $request;
+        $this->configuration = $configuration;
     }
 
     /**
-     * Gets the signed request
-     * @return string
-     */
-    public function getSignedRequest()
-    {
-        $signedRequest = ($this->request->getPost()->get('signed_request')
-            ? $this->request->getPost()->get('signed_request')
-            : $this->request->getQuery()->get('signed_request'));
-        if(empty($signedRequest))
-        {
-            throw new Exception\AuthException('No signed_request has been posted, are you trying to access outside Facebook?');
-        }
-        return $signedRequest;
-    }
-
-    /**
-     * Returns the decoded facebook sigs
-     * @throws \ZfcFacebook\Exception\AuthException
-     * @return array
-     */
-    public function getDecodedSigs()
-    {
-        if(!is_array($this->decodedSigs))
-        {
-            $this->decodedSigs = $this->parseSignedRequest();
-        }
-        if(!is_array($this->decodedSigs))
-        {
-            throw new Exception\AuthException("Invalid decoded sigs");
-        }
-        $decodedSigs = $this->decodedSigs;
-        if(!array_key_exists('expires', $decodedSigs)
-                || !array_key_exists('oauth_token', $decodedSigs))
-        {
-            throw new Exception\AuthException("Token details do not exist");
-        }
-        if($decodedSigs['expires'] < time())
-        {
-            throw new Exception\AuthException("Token has expired");
-
-            if(!array_key_exists('user', $decodedSigs))
-            {
-                throw new  Exception\AuthException("Token details do not exist");
-            }
-            throw new  Exception\AuthException("User has not installed application", self::ERROR_NOTINSTALLED);
-        }
-        if($decodedSigs['expires'] < time())
-        {
-            throw new  Exception\AuthException("Token has expired");
-        }
-        return $this->decodedSigs;
-    }
-
-    /**
-     * Returns the Facebook oauth_token from the decoded sigs
-     * @throws \ZfcFacebook\Exception\AuthException
      * @return string
      */
     public function getToken()
     {
         $decodedSigs = $this->getDecodedSigs();
-        return (string) $decodedSigs['oauth_token'];
+        return (string)$decodedSigs['oauth_token'];
     }
 
     /**
@@ -104,7 +54,43 @@ class Iframe implements Auth
     public function getFacebookId()
     {
         $decodedSigs = $this->getDecodedSigs();
-        return (string) $decodedSigs['user_id'];
+        return (string)$decodedSigs['user_id'];
+    }
+
+    /**
+     * Returns the decoded facebook sigs
+     * @throws \ZfcFacebook\Exception\AuthException
+     * @return array
+     */
+    public function getDecodedSigs()
+    {
+        if (!is_array($this->decodedSigs)) {
+            $this->decodedSigs = $this->parseSignedRequest();
+            if(!$this->decodedSigs) {
+                return false;
+            }
+        }
+        if (!is_array($this->decodedSigs)) {
+            throw new Exception\AuthException("Invalid decoded sigs");
+        }
+        $decodedSigs = $this->decodedSigs;
+        if (!array_key_exists('expires', $decodedSigs)
+            || !array_key_exists('oauth_token', $decodedSigs)
+        ) {
+            throw new Exception\AuthException("Token details do not exist");
+        }
+        if ($decodedSigs['expires'] < time()) {
+            throw new Exception\AuthException("Token has expired");
+
+            if (!array_key_exists('user', $decodedSigs)) {
+                throw new  Exception\AuthException("Token details do not exist");
+            }
+            throw new  Exception\AuthException("User has not installed application", self::ERROR_NOTINSTALLED);
+        }
+        if ($decodedSigs['expires'] < time()) {
+            throw new  Exception\AuthException("Token has expired");
+        }
+        return $this->decodedSigs;
     }
 
     /**
@@ -115,29 +101,48 @@ class Iframe implements Auth
     protected function parseSignedRequest()
     {
         // Check vars
-        if (!is_string($this->fbSecret) || empty($this->fbSecret))
-        {
+        if (!is_string($this->fbSecret) || empty($this->fbSecret)) {
             throw new Exception\AuthException('Invalid Facebook Secret');
         }
-        list($encodedSig, $payload) = \explode('.', $this->getSignedRequest(), 2);
+        $signedRequest = $this->getSignedRequest();
+        if(!$signedRequest) {
+            return false;
+        }
+        list($encodedSig, $payload) = \explode('.', $signedRequest, 2);
 
         // Decode the data
         $decodedSig = $this->base64UrlDecode($encodedSig);
         $data = \json_decode($this->base64UrlDecode($payload), true);
-        if (\strtoupper($data['algorithm']) !== 'HMAC-SHA256')
-        {
+        if (\strtoupper($data['algorithm']) !== 'HMAC-SHA256') {
             throw new Exception\AuthException('Invalid Signed Request');
         }
 
         // Check sig
         $expectedSig = \hash_hmac('sha256', $payload, $this->fbSecret, $raw = true);
-        if ($decodedSig !== $expectedSig)
-        {
+        if ($decodedSig !== $expectedSig) {
             throw new Exception\AuthException('Invalid Signed Request');
         }
 
         return $data;
 
+    }
+
+    /**
+     * @return mixed
+     * @throws \ZfcFacebook\Exception\AuthException
+     */
+    public function getSignedRequest()
+    {
+        $signedRequest = ($this->request->getPost()->get('signed_request')
+            ? $this->request->getPost()->get('signed_request')
+            : $this->request->getQuery()->get('signed_request'));
+        if (empty($signedRequest)) {
+            if($this->configuration['allowoutsidefacebook']) {
+                return false;
+            }
+            throw new Exception\AuthException('No signed_request has been posted, are you trying to access outside Facebook?');
+        }
+        return $signedRequest;
     }
 
     /**

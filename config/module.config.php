@@ -1,15 +1,13 @@
 <?php
 return array(
     'ZfcFacebook' => array(
-        'appid' => '113017628724890',
-        'appsecret' => 'b07b3178d54ac9117bd8067ca0a82696',
+        'appid' => '448702521843756',
+        'appsecret' => '5f70dfcd4363faa46695e70f6b8b021b',
         'iframeapp' => true,
+        'allowoutsidefacebook' => true,
         'notinstalledcontroller' => 'facebook',
         'notinstalledaction' => 'allow',
         'extendedperms' => array(
-            'read_stream',
-            'email',
-            'user_photos',
         ),
     ),
 );

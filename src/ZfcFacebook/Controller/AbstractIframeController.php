@@ -16,7 +16,7 @@ abstract class AbstractIframeController extends AbstractActionController
     /**
      * @var \ZfcFacebook\Facebook
      */
-    protected $facebook;
+    private $facebook;
 
     protected function attachDefaultListeners()
     {
